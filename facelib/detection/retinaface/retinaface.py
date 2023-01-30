@@ -11,10 +11,6 @@ from facelib.detection.retinaface.retinaface_net import FPN, SSH, MobileNetV1, m
 from facelib.detection.retinaface.retinaface_utils import (PriorBox, batched_decode, batched_decode_landm, decode, decode_landm,
                                                  py_cpu_nms)
 
-from basicsr.utils.misc import get_device
-# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device = get_device()
-
 
 def generate_config(network_name):
     
@@ -74,7 +70,7 @@ def generate_config(network_name):
 
 class RetinaFace(nn.Module):
 
-    def __init__(self, network_name='resnet50', half=False, phase='test'):
+    def __init__(self, network_name='resnet50', half=False, phase='test', device=None):
         super(RetinaFace, self).__init__()
         self.half_inference = half
         cfg = generate_config(network_name)
@@ -83,6 +79,7 @@ class RetinaFace(nn.Module):
         self.model_name = f'retinaface_{network_name}'
         self.cfg = cfg
         self.phase = phase
+        self.device = device
         self.target_size, self.max_size = 1600, 2150
         self.resize, self.scale, self.scale1 = 1., None, None
         self.mean_tensor = torch.tensor([[[[104.]], [[117.]], [[123.]]]]).to(device)
@@ -147,19 +144,19 @@ class RetinaFace(nn.Module):
     def __detect_faces(self, inputs):
         # get scale
         height, width = inputs.shape[2:]
-        self.scale = torch.tensor([width, height, width, height], dtype=torch.float32).to(device)
+        self.scale = torch.tensor([width, height, width, height], dtype=torch.float32).to(self.device)
         tmp = [width, height, width, height, width, height, width, height, width, height]
-        self.scale1 = torch.tensor(tmp, dtype=torch.float32).to(device)
+        self.scale1 = torch.tensor(tmp, dtype=torch.float32).to(self.device)
 
         # forawrd
-        inputs = inputs.to(device)
+        inputs = inputs.to(self.device)
         if self.half_inference:
             inputs = inputs.half()
         loc, conf, landmarks = self(inputs)
 
         # get priorbox
         priorbox = PriorBox(self.cfg, image_size=inputs.shape[2:])
-        priors = priorbox.forward().to(device)
+        priors = priorbox.forward().to(self.device)
 
         return loc, conf, landmarks, priors
 
@@ -203,7 +200,7 @@ class RetinaFace(nn.Module):
             imgs: BGR image
         """
         image, self.resize = self.transform(image, use_origin_size)
-        image = image.to(device)
+        image = image.to(self.device)
         if self.half_inference:
             image = image.half()
         image = image - self.mean_tensor
