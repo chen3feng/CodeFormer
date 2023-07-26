@@ -43,19 +43,23 @@ if not os.path.exists('CodeFormer/weights/realesrgan/RealESRGAN_x2plus.pth'):
     load_file_from_url(url=pretrain_model_url['realesrgan'], model_dir='CodeFormer/weights/realesrgan', progress=True, file_name=None)
 
 # download images
-torch.hub.download_url_to_file(
+def download_image(url, file_name):
+    if not os.path.exists(file_name):
+        torch.hub.download_url_to_file(url, file_name)
+
+download_image(
     'https://replicate.com/api/models/sczhou/codeformer/files/fa3fe3d1-76b0-4ca8-ac0d-0a925cb0ff54/06.png',
     '01.png')
-torch.hub.download_url_to_file(
+download_image(
     'https://replicate.com/api/models/sczhou/codeformer/files/a1daba8e-af14-4b00-86a4-69cec9619b53/04.jpg',
     '02.jpg')
-torch.hub.download_url_to_file(
+download_image(
     'https://replicate.com/api/models/sczhou/codeformer/files/542d64f9-1712-4de7-85f7-3863009a7c3d/03.jpg',
     '03.jpg')
-torch.hub.download_url_to_file(
+download_image(
     'https://replicate.com/api/models/sczhou/codeformer/files/a11098b0-a18a-4c02-a19a-9a7045d68426/010.jpg',
     '04.jpg')
-torch.hub.download_url_to_file(
+download_image(
     'https://replicate.com/api/models/sczhou/codeformer/files/7cf19c2c-e0cf-4712-9af8-cf5bdbb8d0ee/012.jpg',
     '05.jpg')
 
@@ -119,9 +123,9 @@ def inference(image, background_enhance, face_upsample, upscale, codeformer_fide
 
         upscale = int(upscale) # convert type to int
         if upscale > 4: # avoid memory exceeded due to too large upscale
-            upscale = 4 
+            upscale = 4
         if upscale > 2 and max(img.shape[:2])>1000: # avoid memory exceeded due to too large img resolution
-            upscale = 2 
+            upscale = 2
         if max(img.shape[:2]) > 1500: # avoid memory exceeded due to too large img resolution
             upscale = 1
             background_enhance = False
@@ -221,7 +225,7 @@ description = r"""<center><img src='https://user-images.githubusercontent.com/14
 🤗 Try CodeFormer for improved stable-diffusion generation!<br>
 """
 article = r"""
-If CodeFormer is helpful, please help to ⭐ the <a href='https://github.com/sczhou/CodeFormer' target='_blank'>Github Repo</a>. Thanks! 
+If CodeFormer is helpful, please help to ⭐ the <a href='https://github.com/sczhou/CodeFormer' target='_blank'>Github Repo</a>. Thanks!
 [![GitHub Stars](https://img.shields.io/github/stars/sczhou/CodeFormer?style=social)](https://github.com/sczhou/CodeFormer)
 
 ---
@@ -240,7 +244,7 @@ If our work is useful for your research, please consider citing:
 
 📋 **License**
 
-This project is licensed under <a rel="license" href="https://github.com/sczhou/CodeFormer/blob/master/LICENSE">S-Lab License 1.0</a>. 
+This project is licensed under <a rel="license" href="https://github.com/sczhou/CodeFormer/blob/master/LICENSE">S-Lab License 1.0</a>.
 Redistribution and use for non-commercial purposes should follow this license.
 
 📧 **Contact**
@@ -249,7 +253,7 @@ If you have any questions, please feel free to reach me out at <b>shangchenzhou@
 
 <div>
     🤗 Find Me:
-    <a href="https://twitter.com/ShangchenZhou"><img style="margin-top:0.5em; margin-bottom:0.5em" src="https://img.shields.io/twitter/follow/ShangchenZhou?label=%40ShangchenZhou&style=social" alt="Twitter Follow"></a> 
+    <a href="https://twitter.com/ShangchenZhou"><img style="margin-top:0.5em; margin-bottom:0.5em" src="https://img.shields.io/twitter/follow/ShangchenZhou?label=%40ShangchenZhou&style=social" alt="Twitter Follow"></a>
     <a href="https://github.com/sczhou"><img style="margin-top:0.5em; margin-bottom:2em" src="https://img.shields.io/github/followers/sczhou?style=social" alt="Github Follow"></a>
 </div>
 
@@ -269,7 +273,7 @@ demo = gr.Interface(
     ],
     title=title,
     description=description,
-    article=article,       
+    article=article,
     examples=[
         ['01.png', True, True, 2, 0.7],
         ['02.jpg', True, True, 2, 0.7],
