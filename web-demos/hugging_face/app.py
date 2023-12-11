@@ -6,6 +6,8 @@ https://huggingface.co/spaces/sczhou/CodeFormer
 import sys
 sys.path.append('CodeFormer')
 import os
+import traceback
+
 import cv2
 import torch
 import torch.nn.functional as F
@@ -170,6 +172,8 @@ def inference(image, background_enhance, face_upsample, upscale, codeformer_fide
             cropped_face_t = cropped_face_t.unsqueeze(0).to(device)
 
             try:
+                if num_det_faces:
+                    print(f'\trestore {idx} faces')
                 with torch.no_grad():
                     output = codeformer_net(
                         cropped_face_t, w=codeformer_fidelity, adain=True
@@ -214,7 +218,7 @@ def inference(image, background_enhance, face_upsample, upscale, codeformer_fide
         restored_img = cv2.cvtColor(restored_img, cv2.COLOR_BGR2RGB)
         return restored_img, save_path
     except Exception as error:
-        print('Global exception', error)
+        print('Global exception', error, traceback.format_exc())
         return None, None
 
 

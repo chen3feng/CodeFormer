@@ -213,6 +213,8 @@ if __name__ == '__main__':
             cropped_face_t = cropped_face_t.unsqueeze(0).to(device)
 
             try:
+                if num_det_faces:
+                    print(f'\trestore {idx} faces')
                 with torch.no_grad():
                     output = net(cropped_face_t, w=w, adain=True)[0]
                     restored_face = tensor2img(output, rgb2bgr=True, min_max=(-1, 1))
